@@ -248,7 +248,7 @@ public class Dynamic {
                             minorServiceMin
                     };
 
-                    for (int l = 0; l < minList.length; l++) {
+                    for (int l = minList.length - 1; l >= 0; l--) {
                         if (minList[l] < min) {
                             min = minList[l];
                             option = l;
@@ -308,6 +308,10 @@ public class Dynamic {
                     break;
             }
         }
+
+        printArray(minCostPerHourService);
+        printArray(minCostPerHour);
+
         // return the result
         return serviceList;
     }
