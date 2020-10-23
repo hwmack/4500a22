@@ -131,6 +131,104 @@ public class DynamicTest {
         checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
     }
 
+    @Test
+    public void exampleDynamicServicesTest1() {
+        int[] hourlyVolume =       {0};
+        int[] fullServiceCapacity = {100,90,80,70,60,50,40,30,20,10};
+        int[] regularServiceCapacity = {70,50,40,30,20,10};
+        int[] minorServiceCapacity = {50,40,20,10};
+        int expectedResult = 0;
+
+        checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
+    }
+
+    @Test
+    public void exampleDynamicServicesTest2() {
+        int[] hourlyVolume =       {10, 20, 50, 70, 100, 11, 12, 30, 80, 90, 70, 10, 20, 1000};
+        int[] fullServiceCapacity = {100,90,80,70,60,50,40,30,20,10};
+        int[] regularServiceCapacity = {70,50,40,30,20,10};
+        int[] minorServiceCapacity = {50,40,20,10};
+        int expectedResult = 1103;
+
+        checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
+    }
+
+    @Test
+    public void exampleDynamicServicesTest3() {
+        int[] hourlyVolume =       {10};
+        int[] fullServiceCapacity = {10};
+        int[] regularServiceCapacity = {7};
+        int[] minorServiceCapacity = {5};
+        int expectedResult = 0;
+
+        checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
+    }
+
+    @Test
+    public void exampleDynamicServicesTest4() {
+        int[] hourlyVolume =       {10, 10, 10, 10, 100};
+        int[] fullServiceCapacity = {10, 10, 10, 10};
+        int[] regularServiceCapacity = {0};
+        int[] minorServiceCapacity = {100};
+        int expectedResult = 10;
+
+        checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
+    }
+
+    @Test
+    public void noValidPathDynamicServices() {
+        int[] hourlyVolume =       {10, 10, 10, 10, 100};
+        int[] fullServiceCapacity = {};
+        int[] regularServiceCapacity = {};
+        int[] minorServiceCapacity = {};
+        int expectedResult = 140;
+
+        checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
+    }
+
+    @Test
+    public void emptyHourlyVolumeDynamicServices() {
+        int[] hourlyVolume =       {};
+        int[] fullServiceCapacity = {};
+        int[] regularServiceCapacity = {};
+        int[] minorServiceCapacity = {};
+        int expectedResult = 0;
+
+        checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
+    }
+
+    @Test
+    public void emptyArraysDynamicServices() {
+        int[] hourlyVolume =       {1, 3, 5, 8, 11};
+        int[] fullServiceCapacity = {};
+        int[] regularServiceCapacity = {};
+        int[] minorServiceCapacity = {10};
+        int expectedResult = 13;
+
+        checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
+    }
+
+    @Test
+    public void allZerosDynamicServices() {
+        int[] hourlyVolume =       {1, 3, 5, 8, 11};
+        int[] fullServiceCapacity = {0, 0, 0, 0};
+        int[] regularServiceCapacity = {0, 0, 0};
+        int[] minorServiceCapacity = {0, 0, 0, 0};
+        int expectedResult = 28;
+
+        checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
+    }
+
+    @Test
+    public void checkingOldThingThatShouldBeFixedDynamicServices() {
+        int[] hourlyVolume =       {10, 10, 10, 10, 100};
+        int[] fullServiceCapacity = {};
+        int[] regularServiceCapacity = {};
+        int[] minorServiceCapacity = {10};
+        int expectedResult = 120;
+
+        checkServicesResult(hourlyVolume, fullServiceCapacity, regularServiceCapacity, minorServiceCapacity, expectedResult);
+    }
     /**
      * Check that Dynamic.optimalActivitiesDynamic produces a valid list of services that would
      * produce the expectedResult
@@ -139,7 +237,7 @@ public class DynamicTest {
                                        int[] minorServiceCapacity, int expectedResult) {
         Service[] actualServices = Dynamic.optimalServicesDynamic(hourlyVolume, fullServiceCapacity,
                 regularServiceCapacity, minorServiceCapacity);
-        //System.out.println(Arrays.toString(actualServices)); //print the result, uncomment to see the result
+        System.out.println(Arrays.toString(actualServices)); //print the result, uncomment to see the result
         checkSolutionValidity(actualServices, hourlyVolume);
         int solutionCost = getCost(hourlyVolume, fullServiceCapacity, regularServiceCapacity,
                 minorServiceCapacity, actualServices);

@@ -53,8 +53,6 @@ public class Dynamic {
             }
         }
 
-        printArray(minCostPerHour);
-
         // for each hour
         for (int i = minCostPerHour.length - 2; i >= 0; i--) {
             // for each hour of service
@@ -64,7 +62,7 @@ public class Dynamic {
                     int[] currentService = services[k];
 
                     int noServiceMin = Integer.MAX_VALUE;
-                    if (j + 1 < currentService.length && j + 1 < minCostPerHour.length) {
+                    if (j < currentService.length && j + 1 < minCostPerHour.length) {
                         int serviceVolume = currentService[j];
                         noServiceMin = Integer.max(0, hourlyVolume[i] - serviceVolume);
                         noServiceMin += minCostPerHour[i + 1][j + 1][k];
@@ -72,7 +70,7 @@ public class Dynamic {
 
                     // Calculate the min value if the full service was to be done now
                     int fullServiceMin = Integer.MAX_VALUE; // By default set it to the max value (so it won't be the min)
-                    if (i + 4 < hourlyVolume.length) { // Check it could be valid to perform a full service in this hour
+                    if (i + 4 < hourlyVolume.length && services[0].length != 0) { // Check it could be valid to perform a full service in this hour
                         int loss = hourlyVolume[i] + hourlyVolume[i + 1]
                                 + hourlyVolume[i + 2] + hourlyVolume[i + 3];
 
@@ -81,26 +79,30 @@ public class Dynamic {
 
                     // Calculate the min value if the regular service was to be done now
                     int regularServiceMin = Integer.MAX_VALUE;
-                    if (i + 2 < hourlyVolume.length) {
+                    if (i + 2 < hourlyVolume.length && services[1].length != 0) {
                         int loss = hourlyVolume[i] + hourlyVolume[i + 1];
                         regularServiceMin = loss + minCostPerHour[i + 2][0][1];
                     }
 
                     // Calculate the min value if the minor service was to be done now
                     int minorServiceMin = Integer.MAX_VALUE;
-                    if (i + 1 < hourlyVolume.length) {
+                    if (i + 1 < hourlyVolume.length && services[2].length != 0) {
                         int loss = hourlyVolume[i];
                         minorServiceMin = loss + minCostPerHour[i + 1][0][2];
                     }
 
-                    minCostPerHour[i][j][k] = Arrays.stream(new int[]{
+                    int min = Arrays.stream(new int[]{
                             noServiceMin,
                             fullServiceMin,
                             regularServiceMin,
                             minorServiceMin
                     }).min().getAsInt();
 
-                    printArray(minCostPerHour);
+                    if (min == Integer.MAX_VALUE) {
+                        min = hourlyVolume[i] + minCostPerHour[i + 1][j][k];
+                    }
+
+                    minCostPerHour[i][j][k] = min;
                 }
             }
         }
@@ -173,7 +175,141 @@ public class Dynamic {
      */
     public static Service[] optimalServicesDynamic(int[] hourlyVolume,
             int[] fullServiceCapacity, int [] regularServiceCapacity, int[] minorServiceCapacity) {
-        return null; // REMOVE THIS LINE AND WRITE THIS METHOD
+        int[][] services = new int[][]{fullServiceCapacity,
+                regularServiceCapacity, minorServiceCapacity};
+        int[][][] minCostPerHour = new int[hourlyVolume.length][hourlyVolume.length][3];
+        int[][][] minCostPerHourService = new int[hourlyVolume.length][hourlyVolume.length][3];
+
+        Service[] serviceList = new Service[hourlyVolume.length];
+
+        if (hourlyVolume.length == 0) {
+            return serviceList;
+        }
+
+        int lastHour = hourlyVolume.length - 1;
+        for (int i = 0; i < minCostPerHour.length; i++) {
+            for (int j = 0; j < services.length; j++) {
+                int[] service = services[j];
+                minCostPerHourService[lastHour][i][j] = 0;
+
+                if (service.length <= i) {
+                    minCostPerHour[lastHour][i][j] = hourlyVolume[lastHour];
+                    continue;
+                }
+
+                minCostPerHour[lastHour][i][j] = Math.max(0, hourlyVolume[lastHour] - service[i]);
+            }
+        }
+
+        // for each hour
+        for (int i = minCostPerHour.length - 2; i >= 0; i--) {
+            // for each hour of service
+            for (int j = minCostPerHour.length - 1; j >= 0; j--) {
+                // for each service
+                for (int k = 0; k < services.length; k++) {
+                    int[] currentService = services[k];
+
+                    int noServiceMin = Integer.MAX_VALUE;
+                    if (j < currentService.length && j + 1 < minCostPerHour.length) {
+                        int serviceVolume = currentService[j];
+                        noServiceMin = Integer.max(0, hourlyVolume[i] - serviceVolume);
+                        noServiceMin += minCostPerHour[i + 1][j + 1][k];
+                    }
+
+                    // Calculate the min value if the full service was to be done now
+                    int fullServiceMin = Integer.MAX_VALUE; // By default set it to the max value (so it won't be the min)
+                    if (i + 4 < hourlyVolume.length && services[0].length != 0) { // Check it could be valid to perform a full service in this hour
+                        int loss = hourlyVolume[i] + hourlyVolume[i + 1]
+                                + hourlyVolume[i + 2] + hourlyVolume[i + 3];
+
+                        fullServiceMin = loss + minCostPerHour[i + 4][0][0];
+                    }
+
+                    // Calculate the min value if the regular service was to be done now
+                    int regularServiceMin = Integer.MAX_VALUE;
+                    if (i + 2 < hourlyVolume.length && services[1].length != 0) {
+                        int loss = hourlyVolume[i] + hourlyVolume[i + 1];
+                        regularServiceMin = loss + minCostPerHour[i + 2][0][1];
+                    }
+
+                    // Calculate the min value if the minor service was to be done now
+                    int minorServiceMin = Integer.MAX_VALUE;
+                    if (i + 1 < hourlyVolume.length && services[2].length != 0) {
+                        int loss = hourlyVolume[i];
+                        minorServiceMin = loss + minCostPerHour[i + 1][0][2];
+                    }
+
+                    int option = -1;
+                    int min = Integer.MAX_VALUE;
+                    int[] minList = new int[]{
+                            noServiceMin,
+                            fullServiceMin,
+                            regularServiceMin,
+                            minorServiceMin
+                    };
+
+                    for (int l = 0; l < minList.length; l++) {
+                        if (minList[l] < min) {
+                            min = minList[l];
+                            option = l;
+                        }
+                    }
+
+                    if (min == Integer.MAX_VALUE) {
+                        min = hourlyVolume[i] + minCostPerHour[i + 1][j][k];
+                        option = -1;
+                    }
+
+                    minCostPerHour[i][j][k] = min;
+                    minCostPerHourService[i][j][k] = option;
+                }
+            }
+        }
+
+        int j = 0, k = 0;
+        Service lastService = null;
+        for (int i = 0; i < serviceList.length; i++) {
+            int option = minCostPerHourService[i][j][k];
+
+            switch (option) {
+                case 0:
+                    serviceList[i] = null;
+
+                    j++;
+                    break;
+
+                case 1:
+                    lastService = Service.FULL_SERVICE;
+                    serviceList[i] = lastService;
+                    serviceList[++i] = lastService;
+                    serviceList[++i] = lastService;
+                    serviceList[++i] = lastService;
+
+                    k = 0;
+                    j = 0;
+
+                    break;
+
+                case 2:
+                    lastService = Service.REGULAR_SERVICE;
+                    serviceList[i] = lastService;
+                    serviceList[++i] = lastService;
+
+                    k = 1;
+                    j = 0;
+                    break;
+
+                case 3:
+                    lastService = Service.MINOR_SERVICE;
+                    serviceList[i] = lastService;
+
+                    k = 2;
+                    j = 0;
+                    break;
+            }
+        }
+        // return the result
+        return serviceList;
     }
 
 }
