@@ -1,7 +1,6 @@
 package assignment2.test;
 
 import assignment2.Dynamic;
-import assignment2.Recursive;
 import assignment2.Service;
 import org.junit.Assert;
 import org.junit.Test;
@@ -237,7 +236,7 @@ public class DynamicTest {
                                        int[] minorServiceCapacity, int expectedResult) {
         Service[] actualServices = Dynamic.optimalServicesDynamic(hourlyVolume, fullServiceCapacity,
                 regularServiceCapacity, minorServiceCapacity);
-        System.out.println(Arrays.toString(actualServices)); //print the result, uncomment to see the result
+//        System.out.println(Arrays.toString(actualServices)); //print the result, uncomment to see the result
         checkSolutionValidity(actualServices, hourlyVolume);
         int solutionCost = getCost(hourlyVolume, fullServiceCapacity, regularServiceCapacity,
                 minorServiceCapacity, actualServices);
